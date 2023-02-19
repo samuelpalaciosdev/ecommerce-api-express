@@ -15,7 +15,11 @@ const register = async (req, res) => {
     throw new BadRequestError('Email already exists');
   }
 
-  const user = await User.create({ ...req.body });
+  // * Set first registered user user as an admin
+  const isFirstAccount = (await User.countDocuments({})) === 0;
+  const role = isFirstAccount ? 'admin' : 'user'; // If is the first account set role to admin
+
+  const user = await User.create({ name, email, password, role });
 
   res.status(200).json({ status: 'success', user });
 };
