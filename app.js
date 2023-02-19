@@ -5,10 +5,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 // Database
 const connectDb = require('./db/connect');
+// Rest of packages
+const morgan = require('morgan');
 // Middleware
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
+app.use(morgan('tiny'));
 app.use(express.json());
 
 app.get('/', (req, res) => {
