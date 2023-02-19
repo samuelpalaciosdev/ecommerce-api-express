@@ -4,8 +4,15 @@ const User = require('../models/User');
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
+  // ! Check if values are passed
   if (!name || !email || !password) {
     throw new BadRequestError('Please provide all fields');
+  }
+
+  // ! Check if email already exists
+  const emailAlreadyExists = await User.find({ email });
+  if (emailAlreadyExists) {
+    throw new BadRequestError('Email already exists');
   }
 
   const user = await User.create({ ...req.body });
