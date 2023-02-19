@@ -7,6 +7,9 @@ const port = process.env.PORT || 5000;
 const connectDb = require('./db/connect');
 // Rest of packages
 const morgan = require('morgan');
+// Router
+const authRouter = require('./routes/authRoutes');
+
 // Middleware
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
@@ -14,9 +17,7 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 app.use(morgan('tiny'));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.status(200).send('Home page');
-});
+app.use('/api/v1/auth', authRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
