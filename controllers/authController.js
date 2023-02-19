@@ -27,7 +27,14 @@ const register = async (req, res) => {
   const tempUser = { name: user.name, userId: user._id, role: user.role };
   const token = createJWT({ payload: tempUser });
 
-  res.status(200).json({ status: 'success', user: tempUser, token });
+  // * Sending token as a cookie
+  const oneDay = 1000 * 60 * 60 * 24; // 24hrs in ms
+  res.cookie('token', token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + oneDay), // Expires in one day
+  });
+
+  res.status(200).json({ status: 'success', user: tempUser });
 };
 const login = async (req, res) => {
   res.status(200).send('Login controller');
