@@ -1,6 +1,6 @@
 const { BadRequestError } = require('../errors');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const { createJWT } = require('../utils');
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,13 +20,12 @@ const register = async (req, res) => {
   const isFirstAccount = (await User.countDocuments({})) === 0;
   const role = isFirstAccount ? 'admin' : 'user'; // If is the first account set role to admin
 
+  // * Create user
   const user = await User.create({ name, email, password, role });
 
-  // * JWT Setup
+  // * JWT
   const tempUser = { name: user.name, userId: user._id, role: user.role };
-  const token = jwt.sign(tempUser, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_LIFETIME,
-  });
+  const token = createJWT({ payload: tempUser });
 
   res.status(200).json({ status: 'success', user: tempUser, token });
 };
