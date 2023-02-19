@@ -1,7 +1,7 @@
 const User = require('../models/User');
-const { attachCookiesToResponse } = require('../utils');
+const { attachCookiesToResponse, isTokenValid } = require('../utils');
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError } = require('../errors');
+const { BadRequestError, UnauthenticatedError } = require('../errors');
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -31,8 +31,32 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  res.status(StatusCodes.OK).send('Login controller');
+  const { email, password } = req.body;
+  // ! Check if all values are passed
+  if (!email || !password) {
+    throw new BadRequestError('Please provide all fields');
+  }
+
+  const user = await User.findOne({ email });
+
+  // ! Check if user doesn't exist
+  if (!user) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
+
+  // ! Check Password
+  const isPasswordCorrect = await user.checkPassword(password);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
+
+  // * If user exists, send JWT cookie
+  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+  attachCookiesToResponse({ res, user: tokenUser });
+
+  res.status(StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
 };
+
 const logout = async (req, res) => {
   res.status(StatusCodes.OK).send('Logout controller');
 };
