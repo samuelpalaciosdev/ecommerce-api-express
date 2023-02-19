@@ -7,6 +7,7 @@ const port = process.env.PORT || 5000;
 const connectDb = require('./db/connect');
 // Rest of packages
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 // Router
 const authRouter = require('./routes/authRoutes');
 
@@ -16,7 +17,14 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 
 app.use(morgan('tiny'));
 app.use(express.json());
+app.use(cookieParser());
 
+app.get('/', (req, res) => {
+  res.status(200).json({ msg: 'Home page :)' });
+});
+app.get('/api/v1', (req, res) => {
+  console.log(req.cookies);
+});
 app.use('/api/v1/auth', authRouter);
 
 app.use(notFoundMiddleware);

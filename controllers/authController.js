@@ -1,6 +1,6 @@
-const { BadRequestError } = require('../errors');
 const User = require('../models/User');
-const { createJWT } = require('../utils');
+const { BadRequestError } = require('../errors');
+const { attachCookiesToResponse } = require('../utils');
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -25,16 +25,8 @@ const register = async (req, res) => {
 
   // * JWT
   const tempUser = { name: user.name, userId: user._id, role: user.role };
-  const token = createJWT({ payload: tempUser });
-
-  // * Sending token as a cookie
-  const oneDay = 1000 * 60 * 60 * 24; // 24hrs in ms
-  res.cookie('token', token, {
-    httpOnly: true,
-    expires: new Date(Date.now() + oneDay), // Expires in one day
-  });
-
-  res.status(200).json({ status: 'success', user: tempUser });
+  attachCookiesToResponse({ res, user: tempUser });
+  res.status(201).json({ status: 'success', user: tempUser });
 };
 const login = async (req, res) => {
   res.status(200).send('Login controller');
