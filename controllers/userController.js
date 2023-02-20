@@ -1,11 +1,22 @@
+const User = require('../models/User');
 const { StatusCodes } = require('http-status-codes');
+const { NotFoundError } = require('../errors');
 
 const getAllUsers = async (req, res) => {
-  res.status(StatusCodes.OK).send('Get all users');
+  // * Get all users with roler user and exclude password
+  const users = await User.find({ role: 'user' }).select('-password');
+  res.status(StatusCodes.OK).json({ users });
 };
 
 const getSingleUser = async (req, res) => {
-  res.status(StatusCodes.OK).send('Get single user');
+  // * Get userById and exclude password
+  const user = await User.findOne({ _id: req.params.id }).select('-password');
+
+  // ! If user not found
+  if (!user) {
+    throw new NotFoundError(`No user with id: ${req.params.id}`);
+  }
+  res.status(StatusCodes.OK).json({ user });
 };
 
 const showCurrentUser = async (req, res) => {
